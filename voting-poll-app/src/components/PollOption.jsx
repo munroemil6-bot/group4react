@@ -18,3 +18,4 @@ function PollOption({ option, vote, hasVoted }) {
 }
 
 export default PollOption;
+

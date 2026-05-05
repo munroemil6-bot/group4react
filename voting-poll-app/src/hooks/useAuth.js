@@ -1,39 +1,38 @@
 import { useState, useEffect } from 'react';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth, googleProvider } from '../firebase';
+import { auth, signInWithGoogle, logoutUser } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export function useAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for auth state changes
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
-
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const login = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      return result.user;
+      const user = await signInWithGoogle();
+      return user;
     } catch (error) {
-      console.error("Google sign-in error:", error);
+      console.error("Login failed:", error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      await logoutUser();
+      setUser(null);
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout failed:", error);
+      throw error;
     }
   };
 
-  return { user, loading, signInWithGoogle, logout };
+  return { user, loading, login, logout };
 }
