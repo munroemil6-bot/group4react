@@ -2,6 +2,7 @@ import PollOption from "./PollOption";
 
 
 function PollList({ options, vote, hasVoted, deleteOption }) {
+    // Calculate total votes for percentage calculation
  const totalVotes = options.reduce((sum, o) => sum + o.votes, 0);
 
 
