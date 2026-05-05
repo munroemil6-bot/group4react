@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4fc59e328eb6e8428ace5aa4438e2a80890aed25
 import { useState, useEffect } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import LoginPage from './components/LoginPage'
