@@ -1,4 +1,4 @@
-function PollOption({ option, vote, hasVoted, percentage }) {
+function PollOption({ option, vote, hasVoted, deleteOption, percentage }) {
   return (
     <li className="flex items-center justify-between rounded bg-white p-3 shadow-sm">
       <div className="w-full">
