@@ -3,17 +3,15 @@
     {
       "id": "1",
       "text": "Myles",
-      "votes": 9
+      "votes": 28,
+      "votedBy": []
     },
     {
       "id": "2",
       "text": "Enoch",
-      "votes": 15
-    },
-    {
-      "id": "3",
-      "text": "Jane",
-      "votes": 8
+      "votes": 15,
+      "votedBy": []
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }
