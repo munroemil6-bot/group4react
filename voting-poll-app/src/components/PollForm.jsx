@@ -54,4 +54,3 @@ function PollForm({ addOption, options }) {
 
 
 export default PollForm;
-

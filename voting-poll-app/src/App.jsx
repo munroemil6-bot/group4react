@@ -1,13 +1,19 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import PollForm from "./components/PollForm";
 import PollList from "./components/PollList";
-import Login from "./components/Login";
+<<<<<<< HEAD
+// import Login from "./components/Login";
 /**import LogoutButton from "./components/LogoutButton";**/
 import { useAuth } from "./hooks/useAuth";
 import './App.css'
+=======
+>>>>>>> 0548312b65da5fe534260895e6ade3f073152403
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null)
   const [options, setOptions] = useState([]);
+>>>>>>> 53cb22ecb9edc8dc1e5d1dc5a902cd029edd4d45
   const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
@@ -16,6 +22,10 @@ function App() {
       .then((data) => setOptions(data))
       .catch((err) => console.error("Error fetching data:", err));
   }, []);
+
+  if (!currentUser) {
+    return <LoginPage onLogin={(username) => setCurrentUser(username)} />
+  }
 
   const addOption = async (text) => {
     const newOption = {
@@ -114,6 +124,16 @@ function App() {
       </h1>
 
       <div className="mx-auto max-w-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <span>Signed in as <strong>{currentUser}</strong></span>
+          <button
+            className="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600"
+            onClick={() => setCurrentUser(null)}
+          >
+            Sign Out
+          </button>
+        </div>
+
         <PollForm addOption={addOption} options={options} />
 
         <PollList
@@ -122,6 +142,12 @@ function App() {
           hasVoted={hasVoted}
           deleteOption={deleteOption}
         />
+
+        {hasVoted && (
+          <p className="mt-4 text-center text-green-600">
+            Thanks for voting, {currentUser}!
+          </p>
+        )}
 
         <div className="mt-6 text-center">
           <button

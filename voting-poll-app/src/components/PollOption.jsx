@@ -1,4 +1,4 @@
-function PollOption({ option, vote, hasVoted, percentage }) {
+function PollOption({ option, vote, hasVoted, deleteOption, percentage }) {
   return (
     <li className="flex items-center justify-between rounded bg-white p-3 shadow-sm">
       <div className="w-full">
@@ -13,7 +13,7 @@ function PollOption({ option, vote, hasVoted, percentage }) {
           {percentage.toFixed(1)}%
         </p>
 
-        {/* Optional visual bar */}
+        {/*  visual bar */}
         <div className="mt-1 h-2 w-full rounded bg-gray-200">
           <div
             className="h-2 rounded bg-green-500"
