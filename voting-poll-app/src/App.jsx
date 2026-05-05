@@ -1,14 +1,27 @@
 import { useState, useEffect } from 'react'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
 import LoginPage from './components/LoginPage'
 import PollForm from './components/PollForm'
 import PollList from './components/PollList'
+import { auth } from './firebase'
 import './App.css'
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [options, setOptions] = useState([]);
-  const [hasVoted, setHasVoted] = useState(false);
-  const [userVotes, setUserVotes] = useState({});
+  const userKey = currentUser?.uid;
+  const votedOption = userKey
+    ? options.find((option) => option.votedBy?.includes(userKey))
+    : null;
+  const hasVoted = Boolean(votedOption);
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user)
+      setAuthLoading(false)
+    })
+  }, [])
 
   useEffect(() => {
     fetch("http://localhost:3000/options")
@@ -17,14 +30,25 @@ function App() {
         .catch((err) => console.error("Error fetching data:", err));
   }, []);
 
+  if (authLoading) {
+    return (
+      <div className="login-wrapper">
+        <div className="login-card">
+          <p className="text-center">Checking account status...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!currentUser) {
-    return <LoginPage onLogin={(username) => setCurrentUser(username)} />
+    return <LoginPage />
   }
 
   const addOption = async (text) => {
     const newOption = {
       text,
       votes: 0,
+      votedBy: [],
       isCustom: true,
     };
 
@@ -45,10 +69,13 @@ function App() {
   };
 
   const vote = async (id) => {
-    if (userVotes[currentUser]) return;
+    if (!userKey || hasVoted) return;
 
     const option = options.find((opt) => opt.id === id);
     if (!option) return;
+
+    const votedBy = option.votedBy ?? [];
+    if (votedBy.includes(userKey)) return;
 
     const res = await fetch(`http://localhost:3000/options/${id}`, {
       method: "PATCH",
@@ -57,6 +84,7 @@ function App() {
       },
       body: JSON.stringify({
         votes: option.votes + 1,
+        votedBy: [...votedBy, userKey],
       }),
     });
 
@@ -66,10 +94,6 @@ function App() {
         prev.map((opt) => (opt.id === id ? updated : opt))
     );
 
-    setUserVotes((prev) => ({
-      ...prev,
-      [currentUser]: id,
-    }));
   };
 
   const deleteOption = async (id) => {
@@ -85,33 +109,25 @@ function App() {
   };
 
   const resetVote = async () => {
-    const votedId = userVotes[currentUser];
-    if (!votedId) return;
+    if (!userKey || !votedOption) return;
 
-    const option = options.find((o) => o.id === votedId);
-    if (!option) return;
-
-    const res = await fetch(`http://localhost:3000/options/${votedId}`, {
+    const votedBy = votedOption.votedBy ?? [];
+    const res = await fetch(`http://localhost:3000/options/${votedOption.id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        votes: option.votes - 1,
+        votes: Math.max(0, votedOption.votes - 1),
+        votedBy: votedBy.filter((id) => id !== userKey),
       }),
     });
 
     const updated = await res.json();
 
     setOptions((prev) =>
-        prev.map((o) => (o.id === votedId ? updated : o))
+        prev.map((option) => (option.id === votedOption.id ? updated : option))
     );
-
-    setUserVotes((prev) => {
-      const copy = { ...prev };
-      delete copy[currentUser];
-      return copy;
-    });
   };
 
   return (
@@ -122,10 +138,10 @@ function App() {
 
         <div className="mx-auto max-w-xl">
           <div className="mb-4 flex items-center justify-between">
-            <span>Signed in as <strong>{currentUser}</strong></span>
+            <span>Signed in as <strong>{currentUser.email}</strong></span>
             <button
                 className="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600"
-                onClick={() => setCurrentUser(null)}
+                onClick={() => signOut(auth)}
             >
               Sign Out
             </button>
@@ -141,19 +157,18 @@ function App() {
           />
 
           {hasVoted && (
-              <p className="mt-4 text-center text-green-600">
-                Thanks for voting, {currentUser}!
-              </p>
+              <div className="mt-4 text-center">
+                <p className="text-green-600">
+                  Thanks for voting, {currentUser.email}! You voted for {votedOption.text}.
+                </p>
+                <button
+                    onClick={resetVote}
+                    className="mt-3 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                >
+                  Reset My Vote
+                </button>
+              </div>
           )}
-
-          <div className="mt-6 text-center">
-            <button
-                onClick={resetVote}
-                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-            >
-              Reset My Vote
-            </button>
-          </div>
         </div>
       </div>
   );
