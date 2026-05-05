@@ -29,6 +29,12 @@ function PollOption({ option, vote, hasVoted, deleteOption, percentage }) {
       >
         Vote
       </button>
+              <button
+          onClick={() => { if (!hasVoted) deleteOption(option.id); }}
+          className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+        >
+          Delete
+        </button>
     </li>
   );
 }
