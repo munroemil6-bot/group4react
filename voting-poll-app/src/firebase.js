@@ -21,11 +21,4 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// ✅ Conditionally initialize Analytics (only in production)
-let analytics;
-if (typeof window !== 'undefined' && import.meta.env.PROD) {
-  analytics = getAnalytics(app);
-}
-
-// Optional: Export analytics if you need it elsewhere
-export { analytics };
+export default app;
