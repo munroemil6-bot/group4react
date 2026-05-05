@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-import PollForm from "./components/PollForm";
-import PollList from "./components/PollList"
-// import Login from "./components/Login";
-/**import LogoutButton from "./components/LogoutButton";**/
-import { useAuth } from "./hooks/useAuth";
-import './App.css'
-
-function App() {
-  const [options, setOptions] = useState([])
-=======
 import { useState, useEffect } from 'react'
 import LoginPage from './components/LoginPage'
 import PollForm from './components/PollForm'
@@ -19,7 +7,6 @@ import './App.css'
 function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [options, setOptions] = useState([]);
->>>>>>> 53cb22ecb9edc8dc1e5d1dc5a902cd029edd4d45
   const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
