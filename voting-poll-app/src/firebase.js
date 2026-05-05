@@ -5,23 +5,27 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyD0MwI5J0zvWmXdxGkoRZ8VR3v9eQGz6HE",
-  authDomain: "voting-poll-app-101cc.firebaseapp.com",
-  projectId: "voting-poll-app-101cc",
-  storageBucket: "voting-poll-app-101cc.firebasestorage.app",
-  messagingSenderId: "693634678213",
-  appId: "1:693634678213:web:3c32185b017b8e06245fac",
-  measurementId: "G-4YF38QV7P8"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Analytics (optional - only works in production)
-const analytics = getAnalytics(app);
-
-// Initialize Authentication
+// Initialize Auth
 export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
 
-// Export the app if needed elsewhere
-export default app;
+// ✅ Conditionally initialize Analytics (only in production)
+let analytics;
+if (typeof window !== 'undefined' && import.meta.env.PROD) {
+  analytics = getAnalytics(app);
+}
+
+// Optional: Export analytics if you need it elsewhere
+export { analytics };
