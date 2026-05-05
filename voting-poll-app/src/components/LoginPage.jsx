@@ -14,7 +14,6 @@ function LoginPage({ onLogin }) {
       return
     }
 
-    // Simple demo login — replace with real auth as needed
     if (password.length < 6) {
       setError('Password must be at least 6 characters.')
       return

@@ -9,12 +9,13 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [options, setOptions] = useState([]);
   const [hasVoted, setHasVoted] = useState(false);
+  const [userVotes, setUserVotes] = useState({});
 
   useEffect(() => {
     fetch("http://localhost:3000/options")
-      .then((res) => res.json())
-      .then((data) => setOptions(data))
-      .catch((err) => console.error("Error fetching data:", err));
+        .then((res) => res.json())
+        .then((data) => setOptions(data))
+        .catch((err) => console.error("Error fetching data:", err));
   }, []);
 
   if (!currentUser) {
@@ -45,32 +46,31 @@ function App() {
   };
 
   const vote = async (id) => {
-    if (hasVoted) return;
+    if (userVotes[currentUser]) return;
 
     const option = options.find((opt) => opt.id === id);
     if (!option) return;
 
-    try {
-      const res = await fetch(`http://localhost:3000/options/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          votes: option.votes + 1,
-        }),
-      });
+    const res = await fetch(`http://localhost:3000/options/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        votes: option.votes + 1,
+      }),
+    });
 
-      const updated = await res.json();
+    const updated = await res.json();
 
-      setOptions((prev) =>
+    setOptions((prev) =>
         prev.map((opt) => (opt.id === id ? updated : opt))
-      );
+    );
 
-      setHasVoted(true);
-    } catch (err) {
-      console.error("Error voting:", err);
-    }
+    setUserVotes((prev) => ({
+      ...prev,
+      [currentUser]: id,
+    }));
   };
 
   const deleteOption = async (id) => {
@@ -85,74 +85,78 @@ function App() {
     }
   };
 
-  const resetVotes = async () => {
-    try {
-      const resetOptions = options.map((opt) => ({
-        ...opt,
-        votes: 0,
-      }));
+  const resetVote = async () => {
+    const votedId = userVotes[currentUser];
+    if (!votedId) return;
 
-      await Promise.all(
-        resetOptions.map((opt) =>
-          fetch(`http://localhost:3000/options/${opt.id}`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ votes: 0 }),
-          })
-        )
-      );
+    const option = options.find((o) => o.id === votedId);
+    if (!option) return;
 
-      setOptions(resetOptions);
-      setHasVoted(false);
-    } catch (err) {
-      console.error("Error resetting votes:", err);
-    }
+    const res = await fetch(`http://localhost:3000/options/${votedId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        votes: option.votes - 1,
+      }),
+    });
+
+    const updated = await res.json();
+
+    setOptions((prev) =>
+        prev.map((o) => (o.id === votedId ? updated : o))
+    );
+
+    setUserVotes((prev) => {
+      const copy = { ...prev };
+      delete copy[currentUser];
+      return copy;
+    });
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 p-4">
-      <h1 className="mb-6 text-center text-3xl font-bold text-orange-500">
-        Student Council Voting
-      </h1>
+      <div className="min-h-screen bg-blue-50 p-4">
+        <h1 className="mb-6 text-center text-3xl font-bold text-orange-500">
+          Student Council Voting
+        </h1>
 
-      <div className="mx-auto max-w-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <span>Signed in as <strong>{currentUser}</strong></span>
-          <button
-            className="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600"
-            onClick={() => setCurrentUser(null)}
-          >
-            Sign Out
-          </button>
-        </div>
+        <div className="mx-auto max-w-xl">
+          <div className="mb-4 flex items-center justify-between">
+            <span>Signed in as <strong>{currentUser}</strong></span>
+            <button
+                className="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600"
+                onClick={() => setCurrentUser(null)}
+            >
+              Sign Out
+            </button>
+          </div>
 
-        <PollForm addOption={addOption} options={options} />
+          <PollForm addOption={addOption} options={options} />
 
-        <PollList
-          options={options}
-          vote={vote}
-          hasVoted={hasVoted}
-          deleteOption={deleteOption}
-        />
+          <PollList
+              options={options}
+              vote={vote}
+              hasVoted={hasVoted}
+              deleteOption={deleteOption}
+          />
 
-        {hasVoted && (
-          <p className="mt-4 text-center text-green-600">
-            Thanks for voting, {currentUser}!
-          </p>
-        )}
+          {hasVoted && (
+              <p className="mt-4 text-center text-green-600">
+                Thanks for voting, {currentUser}!
+              </p>
+          )}
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={resetVotes}
-            className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-          >
-            Reset Votes
-          </button>
+          <div className="mt-6 text-center">
+            <button
+                onClick={resetVote}
+                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+            >
+              Reset My Vote
+            </button>
+          </div>
         </div>
       </div>
-    </div>
   );
 }
 
