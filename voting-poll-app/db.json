@@ -1,0 +1,26 @@
+{
+  "options": [
+    {
+      "id": "1",
+      "text": "Myles",
+      "votes": 11
+    },
+    {
+      "id": "2",
+      "text": "Enoch",
+      "votes": 15
+    },
+    {
+      "id": "3",
+      "text": "Jane",
+      "votes": 8
+    },
+    {
+      "text": "grace",
+      "votes": 1,
+      "isCustom": true,
+      "id": "2FREnmaJa28"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

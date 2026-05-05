@@ -3,103 +3,132 @@ import PollForm from "./components/PollForm";
 import PollList from "./components/PollList";
 
 function App() {
-  const defaultStudents = [
-    { id: 1, text: "Myles ", votes: 9 },
-    { id: 2, text: "Enoch ", votes: 14 },
-    { id: 3, text: "Jane ", votes: 7 },
-  ];
-
-  const [options, setOptions] = useState(() => {
-    const saved = localStorage.getItem("studentPoll");
-    return saved ? JSON.parse(saved) : defaultStudents;
-  });
-
+  const [options, setOptions] = useState([]);
   const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("studentPoll", JSON.stringify(options));
-  }, [options]);
-
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === "studentPoll") {
-        const updatedOptions = JSON.parse(e.newValue);
-        setOptions(updatedOptions);
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
+    fetch("http://localhost:3000/options")
+      .then((res) => res.json())
+      .then((data) => setOptions(data))
+      .catch((err) => console.error("Error fetching data:", err));
   }, []);
 
-  const addOption = (text) => {
+  const addOption = async (text) => {
     const newOption = {
-      id: Date.now(),
       text,
       votes: 0,
       isCustom: true,
     };
-    setOptions([...options, newOption]);
+
+    try {
+      const res = await fetch("http://localhost:3000/options", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newOption),
+      });
+
+      const data = await res.json();
+      setOptions((prev) => [...prev, data]);
+    } catch (err) {
+      console.error("Error adding option:", err);
+    }
   };
 
-  const vote = (id) => {
+  const vote = async (id) => {
     if (hasVoted) return;
 
-    const updated = options.map((opt) =>
-        opt.id === id ? { ...opt, votes: opt.votes + 1 } : opt
-    );
+    const option = options.find((opt) => opt.id === id);
+    if (!option) return;
 
-    setOptions(updated);
-    setHasVoted(true); 
+    try {
+      const res = await fetch(`http://localhost:3000/options/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          votes: option.votes + 1,
+        }),
+      });
+
+      const updated = await res.json();
+
+      setOptions((prev) =>
+        prev.map((opt) => (opt.id === id ? updated : opt))
+      );
+
+      setHasVoted(true);
+    } catch (err) {
+      console.error("Error voting:", err);
+    }
   };
 
-  const deleteOption = (id) => {
-    const updated = options.filter((opt) => opt.id !== id);
-    setOptions(updated);
+  const deleteOption = async (id) => {
+    try {
+      await fetch(`http://localhost:3000/options/${id}`, {
+        method: "DELETE",
+      });
+
+      setOptions((prev) => prev.filter((opt) => opt.id !== id));
+    } catch (err) {
+      console.error("Error deleting option:", err);
+    }
   };
 
-  const resetVotes = () => {
-    const reset = [
-      { id: 1, text: "Myles ", votes: 0 },
-      { id: 2, text: "Enoch ", votes: 0 },
-      { id: 3, text: "Jane ", votes: 0 },
-    ];
+  const resetVotes = async () => {
+    try {
+      const resetOptions = options.map((opt) => ({
+        ...opt,
+        votes: 0,
+      }));
 
-    setOptions(reset);
-    setHasVoted(false);
+      await Promise.all(
+        resetOptions.map((opt) =>
+          fetch(`http://localhost:3000/options/${opt.id}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ votes: 0 }),
+          })
+        )
+      );
 
-    localStorage.setItem("studentPoll", JSON.stringify(reset));
+      setOptions(resetOptions);
+      setHasVoted(false);
+    } catch (err) {
+      console.error("Error resetting votes:", err);
+    }
   };
 
   return (
-      <div className="min-h-screen bg-blue-50 p-4">
-        <h1 className="mb-6 text-center text-3xl font-bold text-orange-500">
-          Student Council Voting
-        </h1>
+    <div className="min-h-screen bg-blue-50 p-4">
+      <h1 className="mb-6 text-center text-3xl font-bold text-orange-500">
+        Student Council Voting
+      </h1>
 
-        <div className="mx-auto max-w-xl">
-          <PollForm addOption={addOption} options={options} />
+      <div className="mx-auto max-w-xl">
+        <PollForm addOption={addOption} options={options} />
 
-          <PollList
-              options={options}
-              vote={vote}
-              hasVoted={hasVoted}
-              deleteOption={deleteOption}
-          />
+        <PollList
+          options={options}
+          vote={vote}
+          hasVoted={hasVoted}
+          deleteOption={deleteOption}
+        />
 
-          <div className="mt-6 text-center">
-            <button
-                onClick={resetVotes}
-                className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-            >
-              Reset Votes
-            </button>
-          </div>
+        <div className="mt-6 text-center">
+          <button
+            onClick={resetVotes}
+            className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+          >
+            Reset Votes
+          </button>
         </div>
       </div>
+    </div>
   );
 }
 
