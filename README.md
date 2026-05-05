@@ -14,7 +14,7 @@ This project requires no installation it can be run directly and easily ffom a w
 ## How to run
 * clone the repository:
 
-* `Git clone` https://github.com/1Enock/group4react-app.git
+* `Git clone` https://github.com/munroemil6-bot/group4react
 * Open the project folder.
 * Navigate using cd command into the my-project directory then run `npm install`
 * Run`npm run dev` on the terminal
@@ -26,6 +26,7 @@ It is to help the voting process be smooth and handle the vote count automatical
 * Myles Munroe
 * Felix Macharia
 * Jane Nyasoro
-* Bruce
-* Elias
+* Bruce Obinda
+* Elias Kosh
 * Glenn Wahome .
+* Enock Kibet
