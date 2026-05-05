@@ -1,11 +1,22 @@
 import { useState, useEffect } from "react";
 import PollForm from "./components/PollForm";
+<<<<<<< HEAD
 import PollList from "./components/PollList"
 import Login from "./components/Login";
 /**import LogoutButton from "./components/LogoutButton";**/
 import { useAuth } from "./hooks/useAuth";
 import './App.css'
 
+=======
+import PollList from "./components/PollList";
+<<<<<<< HEAD
+// import Login from "./components/Login";
+/**import LogoutButton from "./components/LogoutButton";**/
+import { useAuth } from "./hooks/useAuth";
+import './App.css'
+=======
+>>>>>>> 0548312b65da5fe534260895e6ade3f073152403
+>>>>>>> 2117b32f8baba2c29aa816394ebda15b58bc94be
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null)
