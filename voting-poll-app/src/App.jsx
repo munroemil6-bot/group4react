@@ -75,7 +75,7 @@ function App() {
   const deleteOption = async (id) => {
     try {
       await fetch(`http://localhost:3000/options/${id}`, {
-        method: "DELETE",
+        method: "DELETE",o;
       });
 
       setOptions((prev) => prev.filter((opt) => opt.id !== id));
