@@ -13,7 +13,7 @@ function PollOption({ option, vote, hasVoted, deleteOption, percentage }) {
           {percentage.toFixed(1)}%
         </p>
 
-        {/*  visual bar */}
+        {/*  bar  */}
         <div className="mt-1 h-2 w-full rounded bg-gray-200">
           <div
             className="h-2 rounded bg-green-500"
