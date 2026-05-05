@@ -1,30 +1,127 @@
 import { useState, useEffect } from 'react';
 import LoginPage from './components/LoginPage';
-import PollForm from './components/PollForm';
-import PollList from './components/PollList';
+import PositionCard from './components/PositionCard';
 import { useAuth } from './hooks/useAuth';
 import './App.css';
 
+// Fixed positions and candidates data
+const initialPositions = [
+  {
+    id: 1,
+    title: "🎓 President",
+    candidates: [
+      { id: 1, name: "Myles M.", description: "Leadership & Innovation", votes: 0 },
+      { id: 2, name: "Enoch K.", description: "Community First", votes: 0 },
+      { id: 3, name: "Jane W.", description: "Student Voice", votes: 0 }
+    ]
+  },
+  {
+    id: 2,
+    title: "📚 Vice President",
+    candidates: [
+      { id: 4, name: "Sarah J.", description: "Academic Excellence", votes: 0 },
+      { id: 5, name: "John D.", description: "Student Welfare", votes: 0 },
+      { id: 6, name: "Mary A.", description: "Innovation & Change", votes: 0 }
+    ]
+  },
+  {
+    id: 3,
+    title: "💰 Treasurer",
+    candidates: [
+      { id: 7, name: "Peter O.", description: "Financial Accountability", votes: 0 },
+      { id: 8, name: "Lucy M.", description: "Budget Management", votes: 0 },
+      { id: 9, name: "James K.", description: "Transparency First", votes: 0 }
+    ]
+  }
+];
+
 function App() {
   const { user, loading, logout } = useAuth();
-  const [options, setOptions] = useState([]);
-  const [hasVoted, setHasVoted] = useState(false);
+  const [positions, setPositions] = useState(() => {
+    // Load from localStorage if available
+    const saved = localStorage.getItem('votingData');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return initialPositions;
+  });
+  
+  // Track which positions the user has voted for
+  const [hasVoted, setHasVoted] = useState({});
 
-  // Fetch options from JSON Server
-  useEffect(() => {
-    fetch("http://localhost:3000/options")
-      .then((res) => res.json())
-      .then((data) => setOptions(data))
-      .catch((err) => console.error("Error fetching data:", err));
-  }, []);
-
-  // Check if current user has already voted (from localStorage with user ID)
+  // Load user's vote status from localStorage when user logs in
   useEffect(() => {
     if (user) {
-      const userVoteStatus = localStorage.getItem(`hasVoted_${user.uid}`);
-      setHasVoted(userVoteStatus === "true");
+      const savedVotes = localStorage.getItem(`votes_${user.uid}`);
+      if (savedVotes) {
+        setHasVoted(JSON.parse(savedVotes));
+      } else {
+        setHasVoted({});
+      }
     }
   }, [user]);
+
+  // Save voting data to localStorage whenever positions change
+  useEffect(() => {
+    localStorage.setItem('votingData', JSON.stringify(positions));
+  }, [positions]);
+
+  // Save user's vote status to localStorage
+  useEffect(() => {
+    if (user && Object.keys(hasVoted).length > 0) {
+      localStorage.setItem(`votes_${user.uid}`, JSON.stringify(hasVoted));
+    }
+  }, [hasVoted, user]);
+
+  const handleVote = (positionId, candidateId) => {
+    // Check if user already voted for this position
+    if (hasVoted[positionId]) {
+      alert("You have already voted for this position!");
+      return;
+    }
+
+    // Update the vote count
+    setPositions(prevPositions =>
+      prevPositions.map(position => {
+        if (position.id === positionId) {
+          return {
+            ...position,
+            candidates: position.candidates.map(candidate =>
+              candidate.id === candidateId
+                ? { ...candidate, votes: candidate.votes + 1 }
+                : candidate
+            )
+          };
+        }
+        return position;
+      })
+    );
+
+    // Mark this position as voted
+    setHasVoted(prev => ({
+      ...prev,
+      [positionId]: true
+    }));
+
+    // Success message
+    const position = positions.find(p => p.id === positionId);
+    const candidate = position?.candidates.find(c => c.id === candidateId);
+    alert(`✓ You voted for ${candidate?.name} as ${position?.title}!`);
+  };
+
+  const getTotalVotes = () => {
+    let total = 0;
+    positions.forEach(position => {
+      position.candidates.forEach(candidate => {
+        total += candidate.votes;
+      });
+    });
+    return total;
+  };
+
+  const getVotedCount = () => {
+    return Object.keys(hasVoted).length;
+  };
 
   if (loading) {
     return (
@@ -38,173 +135,72 @@ function App() {
     return <LoginPage />;
   }
 
-  const addOption = async (text) => {
-    const newOption = {
-      text,
-      votes: 0,
-      isCustom: true,
-    };
-
-    try {
-      const res = await fetch("http://localhost:3000/options", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newOption),
-      });
-
-      const data = await res.json();
-      setOptions((prev) => [...prev, data]);
-    } catch (err) {
-      console.error("Error adding option:", err);
-    }
-  };
-
-  const vote = async (id) => {
-    if (hasVoted) {
-      alert("You have already voted!");
-      return;
-    }
-
-    const option = options.find((opt) => opt.id === id);
-    if (!option) return;
-
-    try {
-      const res = await fetch(`http://localhost:3000/options/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          votes: option.votes + 1,
-        }),
-      });
-
-      const updated = await res.json();
-
-      setOptions((prev) =>
-        prev.map((opt) => (opt.id === id ? updated : opt))
-      );
-
-      setHasVoted(true);
-      // Store vote status for this specific user
-      localStorage.setItem(`hasVoted_${user.uid}`, "true");
-    } catch (err) {
-      console.error("Error voting:", err);
-    }
-  };
-
-  const deleteOption = async (id) => {
-    try {
-      await fetch(`http://localhost:3000/options/${id}`, {
-        method: "DELETE",
-      });
-
-      setOptions((prev) => prev.filter((opt) => opt.id !== id));
-    } catch (err) {
-      console.error("Error deleting option:", err);
-    }
-  };
-
-  const resetVotes = async () => {
-    // Only allow admin or specific users to reset votes
-    if (user.email !== 'admin@example.com') {
-      alert("Only admin can reset votes");
-      return;
-    }
-
-    try {
-      const resetOptions = options.map((opt) => ({
-        ...opt,
-        votes: 0,
-      }));
-
-      await Promise.all(
-        resetOptions.map((opt) =>
-          fetch(`http://localhost:3000/options/${opt.id}`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ votes: 0 }),
-          })
-        )
-      );
-
-      setOptions(resetOptions);
-      setHasVoted(false);
-      // Clear all user vote statuses (optional)
-      localStorage.clear();
-    } catch (err) {
-      console.error("Error resetting votes:", err);
-    }
-  };
+  const totalVotes = getTotalVotes();
+  const votedCount = getVotedCount();
+  const totalPositions = positions.length;
 
   return (
-    <div className="min-h-screen bg-blue-50 p-4">
-      <h1 className="mb-6 text-center text-3xl font-bold text-orange-500">
-        Student Council Voting
-      </h1>
-
-      <div className="mx-auto max-w-xl">
-        <div className="mb-4 flex items-center justify-between bg-white p-3 rounded-lg shadow">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header with User Info */}
+        <div className="bg-white rounded-xl shadow-lg p-4 mb-6 flex justify-between items-center">
           <div className="flex items-center gap-3">
             {user?.photoURL && (
               <img 
                 src={user.photoURL} 
                 alt="Profile" 
-                className="w-10 h-10 rounded-full"
+                className="w-12 h-12 rounded-full border-2 border-blue-500"
               />
             )}
             <div>
-              <p className="font-semibold text-gray-800">
-                {user?.displayName || user?.email}
-              </p>
+              <p className="font-bold text-gray-800">{user?.displayName || user?.email}</p>
               <p className="text-sm text-gray-500">{user?.email}</p>
             </div>
           </div>
           <button
-            className="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600"
             onClick={logout}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
           >
             Sign Out
           </button>
         </div>
 
-        {!hasVoted && (
-          <div className="mb-4 p-3 bg-yellow-100 rounded-lg text-center">
-            <p className="text-yellow-800">
-              You haven't voted yet. Cast your vote below!
-            </p>
+        {/* Title and Progress */}
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold text-orange-500 mb-2">
+            🗳️ Student Council Elections
+          </h1>
+          <p className="text-gray-600">
+            Total votes cast: {totalVotes} | 
+            Positions voted: {votedCount}/{totalPositions}
+          </p>
+          <div className="w-full bg-gray-200 h-2 rounded-full mt-3 max-w-md mx-auto">
+            <div
+              className="bg-green-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(votedCount / totalPositions) * 100}%` }}
+            />
           </div>
-        )}
-
-        {hasVoted && (
-          <div className="mb-4 p-3 bg-green-100 rounded-lg text-center">
-            <p className="text-green-800">
-              Thanks for voting, {user?.displayName || user?.email}!
-            </p>
-          </div>
-        )}
-
-        <PollForm addOption={addOption} options={options} />
-
-        <PollList
-          options={options}
-          vote={vote}
-          hasVoted={hasVoted}
-          deleteOption={deleteOption}
-        />
-
-        <div className="mt-6 text-center">
-          <button
-            onClick={resetVotes}
-            className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-          >
-            Reset Votes (Admin Only)
-          </button>
         </div>
+
+        {/* Positions */}
+        {positions.map((position) => (
+          <PositionCard
+            key={position.id}
+            position={position}
+            candidates={position.candidates}
+            onVote={handleVote}
+            hasVoted={hasVoted}
+          />
+        ))}
+
+        {/* Completion Message */}
+        {votedCount === totalPositions && (
+          <div className="bg-green-100 border border-green-400 rounded-lg p-4 text-center mt-6">
+            <p className="text-green-700 font-semibold">
+              🎉 Congratulations! You have voted for all positions! 🎉
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
