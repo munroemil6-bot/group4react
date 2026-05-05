@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Environment variables (contains sensitive keys)
+.env.local
+.env
+*.env
+
+
+# OS files
+.DS_Store
+Thumbs.db
