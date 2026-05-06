@@ -31,15 +31,14 @@ function App() {
   }, [])
 
   // 📡 FETCH OPTIONS
-  useEffect(() => {
+   useEffect(() => {
     fetch("http://localhost:3000/options")
       .then((res) => res.json())
       .then((data) => {
-        console.log("DATA FROM SERVER:", data)
-        setOptions(data)
+        setOptions(data);
       })
-      .catch((err) => console.error("Error fetching data:", err))
-  }, [])
+      .catch((err) => console.error("Fetch error:", err));
+  }, []);
 
   if (authLoading) {
     return (
@@ -55,7 +54,6 @@ function App() {
     return <LoginPage />
   }
 
-  // ➕ ADD OPTION
   const addOption = async (text) => {
     const newOption = {
       text,
@@ -81,8 +79,8 @@ function App() {
       console.error("Error adding option:", err)
     }
   }
-
-  // 🗳️ VOTE
+  
+  
   const vote = async (id) => {
     if (!userKey || hasVoted) return
 
@@ -110,7 +108,6 @@ function App() {
     )
   }
 
-  // ❌ DELETE OPTION
   const deleteOption = async (id) => {
     try {
       await fetch(`http://localhost:3000/options/${id}`, {
@@ -125,7 +122,6 @@ function App() {
     }
   }
 
-  // 🔄 RESET VOTE
   const resetVote = async () => {
     if (!userKey || !votedOption) return
 

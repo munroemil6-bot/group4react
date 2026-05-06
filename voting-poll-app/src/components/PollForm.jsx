@@ -6,10 +6,9 @@ function PollForm({ addOption }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!input.trim()) return; // prevent empty
-
-        addOption(input);          // 🔥 send text to App
-        setInput("");              // clear input
+        if (!input.trim()) return; 
+        addOption(input);          
+        setInput("");            
     };
 
     return (

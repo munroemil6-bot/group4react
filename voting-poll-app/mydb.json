@@ -1,0 +1,30 @@
+{
+  "options": [
+    {
+      "id": "1",
+      "text": "Myles",
+      "votes": 10,
+      "votedBy": [
+        "Bz36DyrdhiQF3Zz1QJyqrCzotoN2"
+      ]
+    },
+    {
+      "id": "2",
+      "text": "Enoch",
+      "votes": 15
+    },
+    {
+      "id": "3",
+      "text": "Jane",
+      "votes": 8
+    },
+    {
+      "text": "Elias",
+      "votes": 0,
+      "votedBy": [],
+      "isCustom": true,
+      "id": "0CzYMmzaBkg"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

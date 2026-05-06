@@ -1,12 +1,10 @@
-// src/components/Login.jsx
 import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../firebase"; // Import your configured auth and provider
+import { auth, googleProvider } from "../firebase"; 
 
 function Login() {
   const signInWithGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      // User is signed in successfully
       console.log("User signed in!");
     } catch (error) {
       console.error("Sign-in error:", error);
