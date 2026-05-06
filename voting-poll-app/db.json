@@ -1,17 +1,19 @@
 {
   "options": [
     {
-      "id": "1",
+      "id": 1,
       "text": "Myles",
-      "votes": 28,
-      "votedBy": []
+      "votes": 9
     },
     {
-      "id": "2",
+      "id": 2,
       "text": "Enoch",
-      "votes": 15,
-      "votedBy": []
+      "votes": 15
+    },
+    {
+      "id": 3,
+      "text": "Jane",
+      "votes": 8
     }
-  ],
-  "$schema": "./node_modules/json-server/schema.json"
+  ]
 }

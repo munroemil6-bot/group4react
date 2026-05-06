@@ -1,33 +1,35 @@
 import { useState } from "react";
 
 function PollForm({ addOption }) {
-  const [text, setText] = useState("");
+    const [input, setInput] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!text.trim()) return;
+    const handleSubmit = (e) => {
+        e.preventDefault();
 
-    addOption(text);
-    setText("");
-  };
+        if (!input.trim()) return; // prevent empty
 
-  return (
-    <form onSubmit={handleSubmit} className="mb-6 flex gap-2">
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Add new option..."
-        className="w-full rounded border p-2"
-      />
+        addOption(input);          // 🔥 send text to App
+        setInput("");              // clear input
+    };
 
-      <button
-        type="submit"
-        className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-      >
-        Add
-      </button>
-    </form>
-  );
+    return (
+        <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
+            <input
+                type="text"
+                placeholder="Add student candidate"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="flex-1 rounded border px-3 py-2"
+            />
+
+            <button
+                type="submit"
+                className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            >
+                Add
+            </button>
+        </form>
+    );
 }
 
 export default PollForm;

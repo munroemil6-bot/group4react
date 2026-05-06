@@ -1,6 +1,6 @@
 import PollOption from "./PollOption";
 
-function PollList({ options, vote, deleteOption, totalVotes }) {
+function PollList({ options, vote, deleteOption, totalVotes, hasVoted }) {
   return (
     <div className="space-y-4">
       {options.map((option) => (
@@ -9,7 +9,8 @@ function PollList({ options, vote, deleteOption, totalVotes }) {
           option={option}
           vote={vote}
           deleteOption={deleteOption}
-          totalVotes={totalVotes}
+          hasVoted={hasVoted}
+          percentage={totalVotes === 0 ? 0 : (option.votes / totalVotes) * 100}
         />
       ))}
     </div>

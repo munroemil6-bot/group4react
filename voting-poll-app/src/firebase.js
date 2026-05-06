@@ -1,8 +1,6 @@
-// src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? "AIzaSyB9roDaPkLdyVY9mf-u57Wp-R0wF4mwXaY",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? "voting-app-a1e54.firebaseapp.com",
@@ -13,10 +11,8 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ?? "G-6DHDL8W6L2",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 

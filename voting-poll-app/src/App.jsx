@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 4fc59e328eb6e8428ace5aa4438e2a80890aed25
 import { useState, useEffect } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import LoginPage from './components/LoginPage'
@@ -19,6 +15,7 @@ function App() {
     ? options.find((option) => option.votedBy?.includes(userKey))
     : null;
   const hasVoted = Boolean(votedOption);
+  const totalVotes = options.reduce((sum, o) => sum + o.votes, 0);
 
   useEffect(() => {
     return onAuthStateChanged(auth, (user) => {
@@ -100,11 +97,12 @@ function App() {
 
   };
 
+
   const deleteOption = async (id) => {
     try {
-      await fetch(`http://localhost:3000/options/${id}`, {
-        method: "DELETE",o;
-      });
+    await fetch(`http://localhost:3000/options/${id}`, {
+      method: "DELETE"
+    });
 
       setOptions((prev) => prev.filter((opt) => opt.id !== id));
     } catch (err) {
@@ -154,10 +152,11 @@ function App() {
           <PollForm addOption={addOption} options={options} />
 
           <PollList
-              options={options}
-              vote={vote}
-              hasVoted={hasVoted}
-              deleteOption={deleteOption}
+            options={options}
+            vote={vote}
+            hasVoted={hasVoted}
+            deleteOption={deleteOption}
+            totalVotes={totalVotes}
           />
 
           {hasVoted && (
