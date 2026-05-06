@@ -10,7 +10,7 @@ function PollOption({ option, vote, hasVoted, deleteOption, percentage }) {
 
         {/* Percentage  */}
         <p className="text-sm font-semibold text-black-600">
-          {percentage.toFixed(1)}%
+          {percentage ? percentage.toFixed(1) : 0}%
         </p>
 
         {/*  bar  */}
